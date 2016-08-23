@@ -61,6 +61,8 @@ $route['logout']  = 'auth/logout';
 
 /* project section*/
 $route['projects'] = 'projects/get_project';
+$route['dev_project'] = 'projects/get_dev_project';
+$route['manager_project'] = 'projects/get_manager_project';
 $route['project_user_data'] = 'projects/project_user_data';
 $route['new_project'] = 'projects/new_project';
 $route['project_assign'] = 'projects/project_assign';

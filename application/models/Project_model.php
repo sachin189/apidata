@@ -16,11 +16,9 @@ class Project_model extends MY_Model {
 	{
 		$this->db->select('P.pid,P.title')
 				->from(RELATION_PROJECT_USER.' RPU')
-				->join(PROJECTS.' P','P.pid=RPU.p_id','LEFT')
-				->join(ROLES.' R','R.id=RPU.role','LEFT')
+				->join(PROJECTS.' P','P.pid=RPU.p_id','INNER')
 				->join(USER.' U','U.user_id=RPU.user_id','INNER')
-				->where('RPU.user_id',$this->session->userdata('user_id'))
-				->where('RPU.role',3);
+				->join(ROLES.' R','R.id=RPU.role','LEFT');
 
 		$quey = $this->db->get();
 		$res = $quey->result_array();
@@ -34,13 +32,13 @@ class Project_model extends MY_Model {
 	*/
 	public function get_manager_project_list()
 	{
-		$this->db->select('P.pid,P.title')
+		$this->db->select('P.pid,P.title,R.name')
 				->from(RELATION_PROJECT_USER.' RPU')
-				->join(PROJECTS.' P','P.pid=RPU.p_id','LEFT')
-				->join(ROLES.' R','R.id=RPU.role','LEFT')
+				->join(PROJECTS.' P','P.pid=RPU.p_id','INNER')
 				->join(USER.' U','U.user_id=RPU.user_id','INNER')
+				->join(ROLES.' R','R.id=RPU.role','LEFT')
 				->where('RPU.user_id',$this->session->userdata('user_id'))
-				->where('RPU.role',3);
+				->where('R.id',2);
 
 		$quey = $this->db->get();
 		$res = $quey->result_array();
@@ -48,20 +46,40 @@ class Project_model extends MY_Model {
 	}
 
 	/*
-	* Get project list of developer
+	* Get project list of Dev
 	* You can add colunm name for optimiuze thi query etc.
 	* @return arary() 
 	*/
-	public function get_user_project_list()
+	public function get_dev_project_list()
 	{
-		$this->db->select('P.pid,P.title')
+		$this->db->select('P.pid,P.title,R.name')
 				->from(RELATION_PROJECT_USER.' RPU')
-				->join(PROJECTS.' P','P.pid=RPU.p_id','LEFT')
-				->join(ROLES.' R','R.id=RPU.role','LEFT')
+				->join(PROJECTS.' P','P.pid=RPU.p_id','INNER')
 				->join(USER.' U','U.user_id=RPU.user_id','INNER')
+				->join(ROLES.' R','R.id=RPU.role','LEFT')
 				->where('RPU.user_id',$this->session->userdata('user_id'))
-				->where('RPU.role',3);
+				->where('R.id',3);
 
+		$quey = $this->db->get();
+		$res = $quey->result_array();
+		return $res;	
+	}
+
+	/*
+	* Get project Developer list
+	* You can add colunm name for optimiuze thi query etc.
+	* @return arary() 
+	*/
+	public function get_project_dev_list($devarray)
+	{
+		$this->db->select('RPU.p_id,U.user_id,U.first_name,U.last_name')
+				->from(RELATION_PROJECT_USER.' RPU')
+				->join(PROJECTS.' P','P.pid=RPU.p_id','INNER')
+				->join(USER.' U','U.user_id=RPU.user_id','INNER')
+				->join(ROLES.' R','R.id=RPU.role','LEFT')
+				->where_in('RPU.p_id',$devarray)
+				->where('R.id',3)
+				->group_by('U.user_id');
 		$quey = $this->db->get();
 		$res = $quey->result_array();
 		return $res;	
@@ -82,7 +100,7 @@ class Project_model extends MY_Model {
 	}
 
 	/*
-	* Get project list
+	* Get All project list
 	* You can add colunm name for optimiuze thi query etc.
 	* @return arary() 
 	*/
@@ -108,4 +126,21 @@ class Project_model extends MY_Model {
 		$query =  $this->db->get();		
 		return $query->result_array(); 	
 	}
+
+	/*
+	* Check Project valid users
+	* You can add colunm name for optimiuze thi query etc.
+	* @return arary() 
+	*/
+	public function check_valid_users($pid,$roles,$uid)
+	{
+		$this->db->select('count(id) AS count')
+				->from(RELATION_PROJECT_USER)
+				->where('p_id',$pid)
+				->where('role',$roles)
+				->where('user_id',$uid);
+		$query =  $this->db->get();		
+		return $query->row_array(); 	
+	}
+
 }

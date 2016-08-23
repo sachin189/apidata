@@ -18,25 +18,96 @@ class Projects extends MYREST_Controller {
 	/**
 	 * [get_project_ description]
 	 * @MethodName get_project_
-	 * @Summary This function used to create project
+	 * @Summary This function used to get data for admin user to see all project detaols
 	 * @return 
 	*/
 	public function get_project_post()
 	{
-		echo $this->session->userdata('roles');
-		die;
 		$result = array();
-		$result['project_list'] = $this->Project_model->get_my_project_list();
+		if($this->session->userdata('roles')==1)
+		{
+			$result['project_list'] = $this->Project_model->get_admin_project_list();
+			$response 		= array(
+									config_item('rest_status_field_name')=>TRUE,
+									'data'=>$result,
+									'message'	=> ''										
+								);
+			$this->response($response, rest_controller::HTTP_OK);
+		}
+		else
+		{
+			$response 		= array(
+									config_item('rest_status_field_name')=>FALSE,
+									'message'	=> 'You are not uthorized to see all projects details.'										
+								);
+			$this->response($response, rest_controller::HTTP_OK);
+		}
+	}
+
+	/**
+	 * [get_manager_project description]
+	 * @MethodName get_project_
+	 * @Summary This function used to get projects as role manager.
+	 * @return 
+	*/
+	public function get_manager_project_post()
+	{
+		if($this->session->userdata('roles')==1)
+		{
+			$response 		= array(
+									config_item('rest_status_field_name')=>FALSE,
+									'message'	=> 'You are login as admin'										
+								);
+			$this->response($response, rest_controller::HTTP_OK);
+		}
+
+		$result = array();
+		$project_array = []; 
+		$project_list = $this->Project_model->get_manager_project_list();
+		$result['project_list'] = $project_list;
+		foreach ($project_list as $key => $value) {
+			$project_array[] =  $value['pid'];
+		}
+
+		if(count($project_array)>0)
+		{
+			$result['dev_list'] = $this->Project_model->get_project_dev_list($project_array);
+		}
+
 		$response 		= array(
 									config_item('rest_status_field_name')=>TRUE,
 									'data'=>$result,
 									'message'	=> ''										
 								);
-
 		$this->response($response, rest_controller::HTTP_OK);
-
 	}
 
+	/**
+	 * [get_manager_project description]
+	 * @MethodName get_project_
+	 * @Summary This function used to get project as role developer 
+	 * @return 
+	*/
+	public function get_dev_project_post()
+	{
+		if($this->session->userdata('roles')==1)
+		{
+			$response 		= array(
+									config_item('rest_status_field_name')=>FALSE,
+									'message'	=> 'You are login as admin'										
+								);
+			$this->response($response, rest_controller::HTTP_OK);
+		}
+		$result = array();
+		$result['project_list'] = $this->Project_model->get_dev_project_list();
+		
+		$response 		= array(
+									config_item('rest_status_field_name')=>TRUE,
+									'data'=>$result,
+									'message'	=> ''										
+								);
+		$this->response($response, rest_controller::HTTP_OK);
+	}
 
 	/**
 	 * [new_project description]
@@ -180,18 +251,31 @@ class Projects extends MYREST_Controller {
 			}
 			else 
 			{
-				$object['p_id'] = $this->input->post('p_id');
-				$object['user_id'] = $this->input->post('user_id');
-				$object['role'] = $this->input->post('role');
-				$object['created_date'] = date("Y-m-d H:i:s");
-				$this->db->insert(RELATION_PROJECT_USER, $object);
+				$check = $this->Project_model->check_valid_users($this->input->post('p_id'),$this->input->post('role'),$this->input->post('user_id'));
+				if($check['count']==0)
+				{
+					$object['p_id'] = $this->input->post('p_id');
+					$object['user_id'] = $this->input->post('user_id');
+					$object['role'] = $this->input->post('role');
+					$object['created_date'] = date("Y-m-d H:i:s");
+					$this->db->insert(RELATION_PROJECT_USER, $object);
 
-				$response 		= array(
-									config_item('rest_status_field_name')=>TRUE,
-									'message'	=> 'Project assign successfully'										
-								);
+					$response 		= array(
+										config_item('rest_status_field_name')=>TRUE,
+										'message'	=> 'Project assign successfully'										
+									);
 
-				$this->response($response, rest_controller::HTTP_OK);
+					$this->response($response, rest_controller::HTTP_OK);
+				}
+				else
+				{
+					$response 		= array(
+										config_item('rest_status_field_name')=>TRUE,
+										'message'	=> 'User already assign in this game'										
+									);
+
+					$this->response($response, rest_controller::HTTP_INTERNAL_SERVER_ERROR);
+				}
 			}
 		}
 		else
