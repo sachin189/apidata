@@ -8,11 +8,51 @@ class Project_model extends MY_Model {
 
 
 	/*
-	* Get project list of users
+	* Get project list of admin
 	* You can add colunm name for optimiuze thi query etc.
 	* @return arary() 
 	*/
-	public function get_my_project_list()
+	public function get_admin_project_list()
+	{
+		$this->db->select('P.pid,P.title')
+				->from(RELATION_PROJECT_USER.' RPU')
+				->join(PROJECTS.' P','P.pid=RPU.p_id','LEFT')
+				->join(ROLES.' R','R.id=RPU.role','LEFT')
+				->join(USER.' U','U.user_id=RPU.user_id','INNER')
+				->where('RPU.user_id',$this->session->userdata('user_id'))
+				->where('RPU.role',3);
+
+		$quey = $this->db->get();
+		$res = $quey->result_array();
+		return $res;	
+	}
+
+	/*
+	* Get project list of manager
+	* You can add colunm name for optimiuze thi query etc.
+	* @return arary() 
+	*/
+	public function get_manager_project_list()
+	{
+		$this->db->select('P.pid,P.title')
+				->from(RELATION_PROJECT_USER.' RPU')
+				->join(PROJECTS.' P','P.pid=RPU.p_id','LEFT')
+				->join(ROLES.' R','R.id=RPU.role','LEFT')
+				->join(USER.' U','U.user_id=RPU.user_id','INNER')
+				->where('RPU.user_id',$this->session->userdata('user_id'))
+				->where('RPU.role',3);
+
+		$quey = $this->db->get();
+		$res = $quey->result_array();
+		return $res;	
+	}
+
+	/*
+	* Get project list of developer
+	* You can add colunm name for optimiuze thi query etc.
+	* @return arary() 
+	*/
+	public function get_user_project_list()
 	{
 		$this->db->select('P.pid,P.title')
 				->from(RELATION_PROJECT_USER.' RPU')

@@ -16,13 +16,15 @@ class Projects extends MYREST_Controller {
 	}
 
 	/**
-	 * [new_project description]
-	 * @MethodName new_project
+	 * [get_project_ description]
+	 * @MethodName get_project_
 	 * @Summary This function used to create project
 	 * @return 
 	*/
-	public function get_my_project_post()
+	public function get_project_post()
 	{
+		echo $this->session->userdata('roles');
+		die;
 		$result = array();
 		$result['project_list'] = $this->Project_model->get_my_project_list();
 		$response 		= array(
