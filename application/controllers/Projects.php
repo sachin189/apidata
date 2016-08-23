@@ -139,6 +139,12 @@ class Projects extends MYREST_Controller {
 						'label' => $this->lang->line('project_summary'), 
 						'rules' => 'required|trim|max_length[200]|min_length[2]', 
 						'errors' => array()
+					),
+				array(
+						'field' => 'status',
+						'label' => 'status', 
+						'rules' => 'required|trim', 
+						'errors' => array()
 					)
 			);
 
@@ -153,6 +159,7 @@ class Projects extends MYREST_Controller {
 				$object['description'] = $this->input->post('description');
 				$object['summary'] = $this->input->post('summary');
 				$object['user_id'] = $this->session->userdata('user_id');
+				$object['status'] = $this->session->userdata('status');
 				
 				if($this->input->post('pid'))
 				{

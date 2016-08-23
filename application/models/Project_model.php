@@ -106,11 +106,23 @@ class Project_model extends MY_Model {
 	*/
 	public function get_project_list()
 	{
-		$this->db->select('*')
+		if($this->session->userdata('roles')==1)
+		{
+			$this->db->select('*')
+					->from(PROJECTS)
+					->where('status','1');
+			$query =  $this->db->get();		
+			$res =  $query->result_array(); 	
+		}
+		else {
+			$this->db->select('*')
 				->from(PROJECTS)
+				->where('status','1')
 				->where('user_id',$this->session->userdata('user_id'));
-		$query =  $this->db->get();		
-		return $query->result_array(); 	
+			$query =  $this->db->get();		
+			$res =  $query->result_array();
+		}
+		return $res;
 	}
 
 	/*
